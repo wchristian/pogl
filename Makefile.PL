@@ -1,3 +1,6 @@
+use strict;
+use warnings;
+
 use ExtUtils::MakeMaker;
 use ExtUtils::Liblist;
 use Data::Dumper;
@@ -44,7 +47,7 @@ sub Usage
   };
 
   print "\n";
-  foreach $xface (sort keys %$is_valid_interface)
+  foreach my $xface (sort keys %$is_valid_interface)
   {
     print substr("      $xface                  ",0,24).
       "$is_valid_interface->{$xface}\n";
@@ -52,7 +55,7 @@ sub Usage
   print "\n";
   exit(0);
 }
-Usage() if ($ARGV[0] =~ m|^([-/]*)?h(elp)?|i);
+Usage() if @ARGV and ($ARGV[0] =~ m|^([-/]*)?h(elp)?|i);
 
 
 # Detect CYGWIN - some versions don't report $^O correctly
@@ -200,7 +203,7 @@ if ( grep { m/^interface=/i } @ARGV )
       {
         if ($^O ne 'darwin' || !$found_libs->{GLUT})
         {
-          "AGL interface requires GLUT.framework\n";
+          print "AGL interface requires GLUT.framework\n";
           next;
         }
       }
@@ -476,7 +479,7 @@ else # Everyone else
 
   # Test for obfuscated Freeglut
   # quite often Freeglut is in -lglut...  Test for GL/freeglut.h instead...
-  my $out = cfile_text('GL/freeglut.h');
+  $out = cfile_text('GL/freeglut.h');
 
   # The cpp would not let this macro through. Check for something else
   # that still exists after the cpp pass. a typedef, or type would work
@@ -925,7 +928,8 @@ sub get_extensions
 # Takes as input a INCS string ready for MakeMaker and cleans out
 # non-existant directories produce a minimal configuration value
 sub clean_incs {
-   my $inincs = $_[0];
+   my $inincs = $_[0] || '';
+
    print "clean_incs: got input INCS='$inincs'\n" if $verbose>1;
 
    my @inincs = split / /, $inincs;
@@ -943,7 +947,7 @@ sub clean_incs {
 # non-existant directories and libraries to produce a better,
 # minimal configuration value
 sub clean_libs {
-   my $inlibs = $_[0];
+   my $inlibs = $_[0] || '';
    print "clean_libs: got input LIBS='$inlibs'\n" if $verbose>1;
 
    my @inlibs = split ' ', $inlibs;
@@ -966,6 +970,7 @@ sub WriteConfigPM
 
   die "Unable to write to Config.pm\n" if (!open(CONFIGPM, ">Config.pm"));
 
+  no warnings 'once';
   print CONFIGPM qq
 {
 # This is the Perl OpenGL build configuration file.
