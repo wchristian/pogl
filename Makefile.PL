@@ -59,11 +59,8 @@ Usage() if @ARGV and ($ARGV[0] =~ m|^([-/]*)?h(elp)?|i);
 
 
 # Detect CYGWIN - some versions don't report $^O correctly
-open(SAVEERR, ">&STDERR");
-close(STDERR);
-my $uname = `uname`;
-open(STDERR, ">&SAVEERR");
-our $IS_CYGWIN = ($uname =~ m|^CYGWIN|);
+my $perl_name = `$^X -v`;
+our $IS_CYGWIN = ($perl_name =~ m|cygwin|);
 our $IS_W32API = ($IS_CYGWIN && grep { m/^interface=(W32API|WGL)/i } @ARGV );
 
 
